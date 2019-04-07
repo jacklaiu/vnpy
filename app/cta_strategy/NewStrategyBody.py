@@ -10,7 +10,7 @@ from vnpy.app.cta_strategy.SmtpClient import SmtpClient as smtp
 
 class StrategyBody():
 
-    def __init__(self, security=None, frequency=None, onlyDuo=0, onlyKon=0, trade_position=1, trader=None, enableSendMessage=False,
+    def __init__(self, security=None, frequency='28m', onlyDuo=0, onlyKon=0, trade_position=1, trader=None, enableSendMessage=False,
                  adx_edge=30, real_open_rate=0.2, cond_er=0.4, cond_before_er=1.2, cond_after_er=0.8, fast_ema=6, slow_ema=23):
         self.jqAcc = '13268108673'
         self.jqPwd = 'king20110713'
@@ -59,14 +59,18 @@ class StrategyBody():
         self.trader = trader
 
         self.runningStock = False
+        self.real_open_rate_below = 0
         if Util.isStock(security=self.security) is True:
             self.cond_er = 2
             self.cond_before_er = 4
-            self.cond_after_er = 5
+            self.cond_after_er = 3
             self.real_open_rate = 2
+            self.real_open_rate_below = 8
             self.onlyDuo = 1
             self.onlyKon = 0
+            self.frequency = '17m'
             self.runningStock = True
+            self.security = Util.acJQ_StockName(security)
             self.write_log(words='Stock-------------------------------------------Loading...')
         else:
             self.write_log(words='Future-------------------------------------------Loading...')
@@ -83,6 +87,8 @@ class StrategyBody():
             self.trader.write_log(words)
         if self.enableSendMessage is True:
             try:
+                if "Still Holding" in words and self.runningStock is True:
+                    return
                 self.smtp.sendMail(subject=words, content=words, receivers='jacklaiu@163.com')
             except:
                 pass
@@ -304,6 +310,13 @@ class StrategyBody():
         self.df['ADX'] = talib.ADX(np.array(high), np.array(low), np.array(close), timeperiod=self.adx_timeperiod)
         self.df.drop([self.df.index.tolist()[0]], inplace=True)
 
+    def setPosition(self, position):
+        self.position = position
+    def setOpen(self, open):
+        self.open = open
+    def setReal_Open(self, real_open):
+        self.real_open = real_open
+
     def handleSTILL(self, earningRate, dangerRate):
         # 趋势持续
         if self.status != 'STILL':
@@ -329,9 +342,9 @@ class StrategyBody():
                     self.trader.cover(float(self.tick.limit_up * 0.99), self.trade_position)
                     self.write_log(words='止损止盈平空仓')
 
-            self.position = 0
-            self.open = 0
-            self.real_open = 0
+            self.setPosition(position=0)
+            self.setOpen(open=0)
+            self.setReal_Open(real_open=0)
             self.open_after_next_change = False
         else:
             # 高位回落平仓后再此处等待，或瞬间变化时ADX条件不符合正在等待机会
@@ -342,16 +355,20 @@ class StrategyBody():
                         self.write_log(
                             words='平仓后再此处等待 adx条件符合，开空仓 Down Position' + ' adx:' + str(
                                 self.adx))
-                        self.position = -1
-                        self.open = self.price
+                        # self.position = -1
+                        self.setPosition(position=-1)
+                        # self.open = self.price
+                        self.setOpen(open=self.price)
                         dangerRate = 0
                     # 等到adx条件符合，开多仓
                     elif self.pricePosi == 0 and (self.adx > self.adx_edge):
                         self.write_log(
                             words='平仓后再此处等待 adx条件符合，开多仓 Up Position' + ' adx:' + str(
                                 self.adx))
-                        self.position = 1
-                        self.open = self.price
+                        # self.position = 1
+                        self.setPosition(position=1)
+                        # self.open = self.price
+                        self.setOpen(open=self.price)
                         dangerRate = 0
                     else:
                         self.write_log(
@@ -364,8 +381,17 @@ class StrategyBody():
                     words="Still Holding DUO..." + " dr:" + str(
                         dangerRate) + ' er:' + str(
                         earningRate) + ' adx:' + str(self.adx))
-                if earningRate > self.real_open_rate and self.real_open == 0 and self.onlyKon == 0:
-                    self.real_open = self.price
+
+                if self.runningStock is True and earningRate < self.real_open_rate_below and earningRate > self.real_open_rate and self.real_open == 0 and self.onlyKon == 0:
+                    self.setReal_Open(real_open=self.price)
+                    self.write_log(words='正式做多：' + str(self.price))
+                    self.write_log(words='正式做多：' + str(self.price))
+                    self.write_log(words='正式做多：' + str(self.price))
+                    if self.trader is not None:
+                        self.trader.buy(float(self.tick.limit_up * 0.99), self.trade_position)
+                        self.write_log(words='正式做多，交易完成')
+                elif self.runningStock is False and earningRate > self.real_open_rate and self.real_open == 0 and self.onlyKon == 0:
+                    self.setReal_Open(real_open=self.price)
                     self.write_log(words='正式做多：' + str(self.price))
                     self.write_log(words='正式做多：' + str(self.price))
                     self.write_log(words='正式做多：' + str(self.price))
@@ -380,7 +406,7 @@ class StrategyBody():
                         dangerRate) + ' er:' + str(
                         earningRate) + ' adx:' + str(self.adx))
                 if earningRate > self.real_open_rate and self.real_open == 0 and self.onlyDuo == 0:
-                    self.real_open = self.price
+                    self.setReal_Open(real_open=self.price)
                     self.write_log(words='正式做空：' + str(self.price))
                     self.write_log(words='正式做空：' + str(self.price))
                     self.write_log(words='正式做空：' + str(self.price))
@@ -410,9 +436,9 @@ class StrategyBody():
             if self.adx < self.adx_edge:
                 force_waiting_count = 5
 
-            self.open = 0
-            self.real_open = 0
-            self.position = 0
+            self.setOpen(open=0)
+            self.setReal_Open(real_open=0)
+            self.setPosition(position=0)
         # -------------------------------------------------------------------
         # 变为Down瞬间，adx也符合要求，开空仓
         elif (self.adx > self.adx_edge and self.cfn_count < 10) and self.position == 0:
@@ -420,8 +446,10 @@ class StrategyBody():
                 words='变为Down瞬间，adx也符合要求，开空仓 Down Position' + ' adx:' + str(
                     self.adx))
 
-            self.position = -1
-            self.open = self.price
+            # self.position = -1
+            self.setPosition(position=-1)
+            # self.open = self.price
+            self.setOpen(open=self.price)
 
         self.open_after_next_change = False
 
@@ -430,7 +458,8 @@ class StrategyBody():
             return
         # 前个趋势还在持仓，而现在趋势反转，应该反手做多
         if self.position != 0:
-            self.position = 0
+            # self.position = 0
+            self.setPosition(position=0)
             if self.real_open != 0:
                 self.clearRates.append(round((1 + earningRate / 100), 4))
             else:
@@ -448,9 +477,9 @@ class StrategyBody():
             if self.adx < self.adx_edge:
                 force_waiting_count = 5
 
-            self.open = 0
-            self.real_open = 0
-            self.position = 0
+            self.setOpen(open=0)
+            self.setReal_Open(real_open=0)
+            self.setPosition(position=0)
 
         # -------------------------------------------------------------------
         # 变为Up瞬间，adx也符合要求，开多仓
@@ -458,8 +487,10 @@ class StrategyBody():
             self.write_log(
                 words='变为Up瞬间，adx也符合要求，开多仓 Up Position' + ' adx:' + str(
                     self.adx))
-            self.position = 1
-            self.open = self.price
+            # self.position = 1
+            self.setPosition(position=1)
+            # self.open = self.price
+            self.setOpen(open=self.price)
         self.open_after_next_change = False
 
     def isForceWaitting(self):
@@ -536,7 +567,7 @@ class StrategyBody():
     def isTradeTime(self, nowTimeString=None):
         hm = nowTimeString[-8:-3]
         if self.runningStock is True:
-            if '00:00' <= hm < '09:30' or '11:30' <= hm < '13:00' or '15:00' <= hm <= '23:59':
+            if '00:00' <= hm < '09:30' or '11:30' <= hm < '13:00' or '15:00' <= hm <= '23:59' or Util.isOpen(nowTimeString) is False:
                 return False
             else:
                 return True

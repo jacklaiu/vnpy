@@ -11,6 +11,16 @@ str_no_night = 'jd_ap_v8_v9_sm_sf_l9_l8'
 # 23:00就收市
 str_no_2330 = 'rb'
 
+def acJQ_StockName(security):
+    pre0 = security[0:3]
+    pre1 = security[0:2]
+    if security.__len__() > 6 and 'SH' in security:
+        return security
+    if '30' == pre1 or '002' == pre0 or '000' == pre0 or '00' == pre1:
+        return security + '.XSHE'
+    else:
+        return security + '.XSHG'
+
 def isStock(security):
     if '.' in security:
         xchg = security[-4:]
@@ -22,8 +32,6 @@ def isStock(security):
             return True
         else:
             return False
-
-print(isStock(security='300012'))
 
 def log(words=''):
     ymd = getYMD()
