@@ -58,7 +58,18 @@ class StrategyBody():
         self.trade_position = trade_position
         self.trader = trader
 
-        self.write_log(words='-------------------------------------------')
+        self.runningStock = False
+        if Util.isStock(security=self.security) is True:
+            self.cond_er = 2
+            self.cond_before_er = 4
+            self.cond_after_er = 5
+            self.real_open_rate = 2
+            self.onlyDuo = 1
+            self.onlyKon = 0
+            self.runningStock = True
+            self.write_log(words='Stock-------------------------------------------Loading...')
+        else:
+            self.write_log(words='Future-------------------------------------------Loading...')
 
     def write_log(self, words=None):
         if self.nowTimeString is None:
@@ -66,8 +77,7 @@ class StrategyBody():
         else:
             nts = self.nowTimeString
         words = "[" + nts + " - " + self.security + ']：' + words
-        if self.nowTimeString is not None:
-            print(words)
+        print(words)
         Util.log(words)
         if self.trader is not None:
             self.trader.write_log(words)
@@ -523,8 +533,23 @@ class StrategyBody():
         if self.clearRates.__len__() > 500:
             self.clearRates.pop(0)
 
+    def isTradeTime(self, nowTimeString=None):
+        hm = nowTimeString[-8:-3]
+        if self.runningStock is True:
+            if '00:00' <= hm < '09:30' or '11:30' <= hm < '13:00' or '15:00' <= hm <= '23:59':
+                return False
+            else:
+                return True
+        else:
+            if '00:00' <= hm < '09:00' or '10:15' <= hm < '10:30' or '11:30' <= hm < '13:30' or '15:00' <= hm < '21:00' or '23:00' <= hm <= '23:59':
+                return False
+            else:
+                return True
+
     def handleOneTick(self, nowTimeString=None, tick=None):
         self.nowTimeString = nowTimeString
+        if self.isTradeTime(nowTimeString=nowTimeString) is False:
+            return
         ts = Util.string2timestamp(str(nowTimeString))
         if self.lastaccesstimestamp is None or (ts - self.lastaccesstimestamp) > (int(self.frequency[0:-1]) * 58):
             self.markTick(nowTimeString=nowTimeString, tick=tick)
@@ -533,3 +558,4 @@ class StrategyBody():
             self.lastaccesstimestamp = ts
             if self.trader is not None:
                 self.trader.put_event()
+

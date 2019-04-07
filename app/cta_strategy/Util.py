@@ -11,6 +11,20 @@ str_no_night = 'jd_ap_v8_v9_sm_sf_l9_l8'
 # 23:00就收市
 str_no_2330 = 'rb'
 
+def isStock(security):
+    if '.' in security:
+        xchg = security[-4:]
+        if xchg == 'XSHG' or xchg == 'XSHE':
+            return True
+        return False
+    else:
+        if '002' in security or '60' in security or '000' in security or '30' in security:
+            return True
+        else:
+            return False
+
+print(isStock(security='300012'))
+
 def log(words=''):
     ymd = getYMD()
     f = open('log_' + ymd, 'a')

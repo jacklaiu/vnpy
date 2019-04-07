@@ -1,7 +1,7 @@
 from vnpy.app.cta_strategy.NewStrategyBody import StrategyBody
 import vnpy.app.cta_strategy.Util as util
 
-startTime = '2018-11-14 14:00:00'
+startTime = '2019-03-29 09:30:00'
 name = 'jd8888'
 jq_s_name = util.get_JQ_Format_name(name)
 ctp_s_name = util.get_CTA_Format_name(name)
