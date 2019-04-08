@@ -92,6 +92,8 @@ class MyStrategy(CtaTemplate):
         """
         Callback of new tick data update.
         """
+        if self.nsb is None:
+            self.on_start()
         self.nsb.handleOneTick(nowTimeString=Util.getYMDHMS(), tick=tick)
         self.write_log(str(Util.getYMDHMS()) + ": " + str(tick.last_price))
         self.put_event()
