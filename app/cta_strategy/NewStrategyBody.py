@@ -16,7 +16,6 @@ class StrategyBody():
         self.jqPwd = 'king20110713'
         jqdatasdk.auth(self.jqAcc, self.jqPwd)
 
-        self.smtp = smtp(enable=enableSendMessage)
         self.enableSendMessage = enableSendMessage
 
         self.markTreses = False
@@ -69,11 +68,16 @@ class StrategyBody():
             self.onlyDuo = 1
             self.onlyKon = 0
             self.frequency = '17m'
+            self.enableSendMessage = True
             self.runningStock = True
             self.security = Util.acJQ_StockName(security)
+            self.smtp = smtp(enable=self.enableSendMessage)
             self.write_log(words='Stock-------------------------------------------Loading...')
         else:
+            self.smtp = smtp(enable=self.enableSendMessage)
             self.write_log(words='Future-------------------------------------------Loading...')
+
+
 
     def write_log(self, words=None):
         if self.nowTimeString is None:
@@ -87,8 +91,6 @@ class StrategyBody():
             self.trader.write_log(words)
         if self.enableSendMessage is True:
             try:
-                if "Still Holding" in words and self.runningStock is True:
-                    return
                 self.smtp.sendMail(subject=words, content=words, receivers='jacklaiu@163.com')
             except:
                 pass
