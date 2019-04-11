@@ -61,7 +61,6 @@ from vnpy.trader.object import (
 from vnpy.trader.utility import get_folder_path
 from vnpy.trader.event import EVENT_TIMER
 
-
 STATUS_CTP2VT = {
     THOST_FTDC_OAS_Submitted: Status.SUBMITTING,
     THOST_FTDC_OAS_Accepted: Status.SUBMITTING,
@@ -150,15 +149,37 @@ class CtpGateway(BaseGateway):
         md_address = setting["行情服务器"]
         product_info = setting["产品名称"]
         auth_code = setting["授权编码"]
-        
+
         if not td_address.startswith("tcp://"):
             td_address = "tcp://" + td_address
         if not md_address.startswith("tcp://"):
             md_address = "tcp://" + md_address
-        
+
         self.td_api.connect(td_address, userid, password, brokerid, auth_code, product_info)
         self.md_api.connect(md_address, userid, password, brokerid)
-        
+
+        self.init_query()
+
+    def connectCTP(self, userid='6061537', password='queue11235813', brokerid=9099,
+                   td_address='tcp://140.206.101.140:41205',
+                   md_address='tcp://140.206.101.140:41213'):
+        """"""
+        userid = userid
+        password = password
+        brokerid = brokerid
+        td_address = td_address
+        md_address = md_address
+        product_info = ''
+        auth_code = ''
+
+        if not td_address.startswith("tcp://"):
+            td_address = "tcp://" + td_address
+        if not md_address.startswith("tcp://"):
+            md_address = "tcp://" + md_address
+
+        self.td_api.connect(td_address, userid, password, brokerid, auth_code, product_info)
+        self.md_api.connect(md_address, userid, password, brokerid)
+
         self.init_query()
 
     def subscribe(self, req: SubscribeRequest):

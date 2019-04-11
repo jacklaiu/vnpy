@@ -338,10 +338,10 @@ class StrategyBody():
 
             if self.real_open > 0 and self.trader is not None:
                 if self.position > 0:
-                    self.trader.sell(float(self.tick.limit_down * 1.01), self.trade_position)
+                    self.trader.sell(price=float(self.tick.last_price * 0.99), volume=np.int32(self.trade_position))
                     self.write_log(words='止损止盈平多仓')
                 else:
-                    self.trader.cover(float(self.tick.limit_up * 0.99), self.trade_position)
+                    self.trader.cover(float(self.tick.last_price * 1.01), self.trade_position)
                     self.write_log(words='止损止盈平空仓')
 
             self.setPosition(position=0)
@@ -390,7 +390,7 @@ class StrategyBody():
                     self.write_log(words='正式做多：' + str(self.price))
                     self.write_log(words='正式做多：' + str(self.price))
                     if self.trader is not None:
-                        self.trader.buy(float(self.tick.limit_up * 0.99), self.trade_position)
+                        self.trader.buy(price=float(self.tick.last_price * 1.01), volume=np.int32(self.trade_position))
                         self.write_log(words='正式做多，交易完成')
                 elif self.runningStock is False and earningRate > self.real_open_rate and self.real_open == 0 and self.onlyKon == 0:
                     self.setReal_Open(real_open=self.price)
@@ -398,7 +398,7 @@ class StrategyBody():
                     self.write_log(words='正式做多：' + str(self.price))
                     self.write_log(words='正式做多：' + str(self.price))
                     if self.trader is not None:
-                        self.trader.buy(float(self.tick.limit_up * 0.99), self.trade_position)
+                        self.trader.buy(price=float(self.tick.last_price * 0.99), volume=np.int32(self.trade_position))
                         self.write_log(words='正式做多，交易完成')
 
             # 持有空仓
@@ -413,7 +413,7 @@ class StrategyBody():
                     self.write_log(words='正式做空：' + str(self.price))
                     self.write_log(words='正式做空：' + str(self.price))
                     if self.trader is not None:
-                        self.trader.short(float(self.tick.limit_down * 1.01), self.trade_position)
+                        self.trader.short(price=float(self.tick.last_price * 0.99), volume=np.int32(self.trade_position))
                         self.write_log(words='正式做空，交易完成')
 
     def handleDOWN(self, earningRate, dangerRate):
