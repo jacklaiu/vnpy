@@ -23,6 +23,7 @@ class MyStrategy(CtaTemplate):
     onlyKon = 0
     trade_position = 1
     enableTrade = 1
+    use_persisted_prop = 0
 
     fast_ma0 = 0.0
     fast_ma1 = 0.0
@@ -30,7 +31,7 @@ class MyStrategy(CtaTemplate):
     slow_ma0 = 0.0
     slow_ma1 = 0.0
 
-    parameters = ['security', 'frequency', 'onlyDuo', 'onlyKon', 'trade_position']
+    parameters = ['security', 'frequency', 'onlyDuo', 'onlyKon', 'trade_position', 'use_persisted_prop']
     variables = ['fast_ma0', 'fast_ma1', 'slow_ma0', 'slow_ma1']
 
     def __init__(self, cta_engine, strategy_name, vt_symbol, setting):
@@ -49,7 +50,7 @@ class MyStrategy(CtaTemplate):
         """
         self.nsb = StrategyBody(security=self.security, frequency=self.frequency, onlyDuo=self.onlyDuo,
                                 onlyKon=self.onlyKon,
-                                enableSendMessage=True, trade_position=self.trade_position, trader=self)
+                                enableSendMessage=True, trade_position=self.trade_position, use_persisted_prop=(self.use_persisted_prop == 1), trader=self)
         self.write_log("策略on_init - jqdatasdk security: " + str(self.nsb.security))
         self.write_log("策略on_init - jqdatasdk frequency: " + str(self.nsb.frequency))
         self.write_log("策略on_init - jqdatasdk onlyDuo: " + str(self.nsb.onlyDuo))
@@ -65,7 +66,7 @@ class MyStrategy(CtaTemplate):
         """
         self.nsb = StrategyBody(security=self.security, frequency=self.frequency, onlyDuo=self.onlyDuo,
                                 onlyKon=self.onlyKon,
-                                enableSendMessage=True, trade_position=self.trade_position, trader=self)
+                                enableSendMessage=True, trade_position=self.trade_position, use_persisted_prop=(self.use_persisted_prop == 1), trader=self)
         self.write_log("策略on_start - jqdatasdk security: " + str(self.nsb.security))
         self.write_log("策略on_start - jqdatasdk frequency: " + str(self.nsb.frequency))
         self.write_log("策略on_start - jqdatasdk onlyDuo: " + str(self.nsb.onlyDuo))
