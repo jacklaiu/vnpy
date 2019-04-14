@@ -78,6 +78,31 @@ def setProperty(key, value):
     f.write(ctn)
     f.close()
 
+def hset(key, field, value):
+    obj = getProperty(key)
+    if obj is None:
+        obj = {field: value}
+        setProperty(key, obj)
+    else :
+        obj.setdefault(field, value)
+        setProperty(key, obj)
+
+def hget(key, field):
+    obj = getProperty(key)
+    if obj is None:
+        return None
+    else:
+        return obj.get(field)
+
+def hdel(key, field):
+    obj = {}
+    # obj = getProperty(key)
+    if obj is None:
+        return
+    else:
+        if field in obj:
+            del obj[field]
+        setProperty(key, obj)
 
 def getProperty(key):
     f = open('properties.txt', 'r')
@@ -148,18 +173,18 @@ def get_JQ_Format_name(securityName=None):
             isxdce = xchg == 'XDCE'
             if isxzce is True:
                 str = originSN
-                str = str[0:2].upper() + '8888.XZCE'
+                str = str[0:6].upper() + '.XZCE'
                 return str
             if isxsge is True:
                 str = originSN
-                str = str[0:2].upper() + '8888.XSGE'
+                str = str[0:6].upper() + '.XSGE'
                 return str
             if isxdce is True:
                 str = originSN
                 if str[1:2] == '1' or str[1:2] == '8' or str[1:2] == '9':
-                    str = str[0:1].upper() + '8888.XDCE'
+                    str = str[0:5].upper() + '.XDCE'
                 else:
-                    str = str[0:2].upper() + '8888.XDCE'
+                    str = str[0:6].upper() + '.XDCE'
                 return str
 
 def futureName(security):

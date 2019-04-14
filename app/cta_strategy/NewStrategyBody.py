@@ -10,7 +10,7 @@ from vnpy.app.cta_strategy.SmtpClient import SmtpClient as smtp
 
 class StrategyBody():
 
-    def __init__(self, security=None, frequency='28m', onlyDuo=0, onlyKon=0, trade_position=1, trader=None, enableSendMessage=False,
+    def __init__(self, security=None, frequency='28m', onlyDuo=0, onlyKon=0, trade_position=1, trader=None, enableSendMessage=False, use_persisted_prop=True,
                  adx_edge=30, real_open_rate=0.2, cond_er=0.4, cond_before_er=1.2, cond_after_er=0.8, fast_ema=6, slow_ema=23):
         self.jqAcc = '13268108673'
         self.jqPwd = 'king20110713'
@@ -77,7 +77,19 @@ class StrategyBody():
             self.smtp = smtp(enable=self.enableSendMessage)
             self.write_log(words='Future-------------------------------------------Loading...')
 
-
+        if use_persisted_prop is True:
+            _position = Util.hget(self.security, 'position')
+            if _position is not None:
+                self.position = _position
+            _open = Util.hget(self.security, 'open')
+            if _open is not None:
+                self.open = _open
+            _real_open = Util.hget(self.security, 'real_open')
+            if _real_open is not None:
+                self.real_open = _real_open
+            self.write_log(words='恢复运行')
+        else:
+            self.write_log(words='重新运行')
 
     def write_log(self, words=None):
         if self.nowTimeString is None:
@@ -314,10 +326,13 @@ class StrategyBody():
 
     def setPosition(self, position):
         self.position = position
+        Util.hset(self.security, 'position', self.position)
     def setOpen(self, open):
         self.open = open
+        Util.hset(self.security, 'open', self.open)
     def setReal_Open(self, real_open):
         self.real_open = real_open
+        Util.hset(self.security, 'real_open', self.real_open)
 
     def handleSTILL(self, earningRate, dangerRate):
         # 趋势持续
