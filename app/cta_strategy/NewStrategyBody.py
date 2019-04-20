@@ -96,7 +96,7 @@ class StrategyBody():
             nts = 'YYYY-MM-DD HH:mm:ss'
         else:
             nts = self.nowTimeString
-        words = "[" + nts + " - " + self.security + ']：' + words
+        words = "[" + nts + " - " + self.frequency + "_" + self.security + ']：' + words
         print(words)
         Util.log(words)
         if self.trader is not None:
