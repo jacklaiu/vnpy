@@ -80,13 +80,11 @@ class MyStrategy(CtaTemplate):
         """
         Callback when strategy is stopped.
         """
-        self.write_log("策略on_stop - jqdatasdk security: " + str(self.nsb.security))
-        self.write_log("策略on_stop - jqdatasdk frequency: " + str(self.nsb.frequency))
-        self.write_log("策略on_stop - jqdatasdk onlyDuo: " + str(self.nsb.onlyDuo))
-        self.write_log("策略on_stop - jqdatasdk onlyKon: " + str(self.nsb.onlyKon))
-        self.write_log("策略on_stop - jqdatasdk enableSendMessage: " + str(self.nsb.enableSendMessage))
-        self.write_log("策略on_stop - jqdatasdk trade_position: " + str(self.nsb.trade_position))
-        self.write_log("策略on_stop - jqdatasdk trader: " + str(self.nsb.trader is not None))
+        self.nsb.setPosition(position=0)
+        self.nsb.setOpen(open=0)
+        self.nsb.setReal_Open(real_open=0)
+        self.nsb.open_after_next_change = False
+        self.write_log("策略on_stop - 状态已清空")
         self.put_event()
 
     def on_tick(self, tick: TickData):

@@ -126,7 +126,7 @@ def get_CTA_Format_name(securityName=None):
         return
     originSN = securityName
     securityName = securityName.upper()[0:2]
-    line = 'EG.XDCE_AG.XSGE_PB.XSGE_AU.XSGE_RB.XSGE_AL.XSGE_RU.XSGE_BU.XSGE_SN.XSGE_CU.XSGE_WR.XSGE_FU.XSGE_ZN.XSGE_HC.XSGE_NI.XSGE_CY.XZCE_RM.XZCE_CF.XZCE_RM.XZCE_FG.XZCE_RS.XZCE_JR.XZCE_SF.XZCE_LR.XZCE_SM.XZCE_MA.XZCE_SR.XZCE_TA.XZCE_OI.XZCE_PM.XZCE_ZC.XZCE_AP.XZCE_A1.XDCE_JD.XDCE_B1.XDCE_JM.XDCE_BB.XDCE_L1.XDCE_C1.XDCE_M1.XDCE_CS.XDCE_P1.XDCE_FB.XDCE_PP.XDCE_I1.XDCE_V1.XDCE_J1.XDCE_Y1.XDCE'
+    line = 'EG.XDCE_AG.XSGE_PB.XSGE_AU.XSGE_RB.XSGE_AL.XSGE_RU.XSGE_BU.XSGE_SN.XSGE_CU.XSGE_WR.XSGE_FU.XSGE_ZN.XSGE_HC.XSGE_NI.XSGE_CY.XZCE_RM.XZCE_CF.XZCE_RM.XZCE_FG.XZCE_RS.XZCE_JR.XZCE_SF.XZCE_LR.XZCE_SM.XZCE_MA.XZCE_SR.XZCE_TA.XZCE_OI.XZCE_PM.XZCE_ZC.XZCE_AP.XZCE_JD.XDCE_JM.XDCE_BB.XDCE_M8.XDCE_CS.XDCE_P8.XDCE_FB.XDCE_PP.XDCE_I1.XDCE_V1.XDCE_J1.XDCE_Y1.XDCE_A1.XDCE_B1.XDCE_L1.XDCE_C1.XDCE_M1.XDCE_P1.XDCE_I2.XDCE_V2.XDCE_J2.XDCE_Y2.XDCE_A2.XDCE_B2.XDCE_L2.XDCE_C2.XDCE_M2.XDCE_P2.XDCE'
     list = line.split('_')
     for el in list:
         if securityName in el:
@@ -148,7 +148,7 @@ def get_CTA_Format_name(securityName=None):
                 return str
             if isxdce is True:
                 str = originSN
-                if str[1:2] == '1':
+                if str[1:2] in '123456789':
                     str = str[0:1].lower() + str[-4:] + '.DCE'
                 else:
                     str = str[0:2].lower() + str[-4:] + '.DCE'
@@ -159,7 +159,7 @@ def get_JQ_Format_name(securityName=None):
         return
     originSN = securityName
     securityName = securityName.upper()[0:2]
-    line = 'EG.XDCE_AG.XSGE_PB.XSGE_AU.XSGE_RB.XSGE_AL.XSGE_RU.XSGE_BU.XSGE_SN.XSGE_CU.XSGE_WR.XSGE_FU.XSGE_ZN.XSGE_HC.XSGE_NI.XSGE_CY.XZCE_RM.XZCE_CF.XZCE_RM.XZCE_FG.XZCE_RS.XZCE_JR.XZCE_SF.XZCE_LR.XZCE_SM.XZCE_MA.XZCE_SR.XZCE_TA.XZCE_OI.XZCE_PM.XZCE_ZC.XZCE_AP.XZCE_A1.XDCE_JD.XDCE_B1.XDCE_JM.XDCE_BB.XDCE_L1.XDCE_C1.XDCE_M1.XDCE_M8.XDCE_CS.XDCE_P1.XDCE_P8.XDCE_FB.XDCE_PP.XDCE_I1.XDCE_V1.XDCE_J1.XDCE_Y1.XDCE'
+    line = 'EG.XDCE_AG.XSGE_PB.XSGE_AU.XSGE_RB.XSGE_AL.XSGE_RU.XSGE_BU.XSGE_SN.XSGE_CU.XSGE_WR.XSGE_FU.XSGE_ZN.XSGE_HC.XSGE_NI.XSGE_CY.XZCE_RM.XZCE_CF.XZCE_RM.XZCE_FG.XZCE_RS.XZCE_JR.XZCE_SF.XZCE_LR.XZCE_SM.XZCE_MA.XZCE_SR.XZCE_TA.XZCE_OI.XZCE_PM.XZCE_ZC.XZCE_AP.XZCE_JD.XDCE_JM.XDCE_BB.XDCE_M8.XDCE_CS.XDCE_P8.XDCE_FB.XDCE_PP.XDCE_I1.XDCE_V1.XDCE_J1.XDCE_Y1.XDCE_A1.XDCE_B1.XDCE_L1.XDCE_C1.XDCE_M1.XDCE_P1.XDCE_I2.XDCE_V2.XDCE_J2.XDCE_Y2.XDCE_A2.XDCE_B2.XDCE_L2.XDCE_C2.XDCE_M2.XDCE_P2.XDCE'
     list = line.split('_')
     for el in list:
         if securityName in el:
@@ -181,7 +181,7 @@ def get_JQ_Format_name(securityName=None):
                 return str
             if isxdce is True:
                 str = originSN
-                if str[1:2] == '1' or str[1:2] == '8' or str[1:2] == '9':
+                if str[1:2] in '123456789':
                     str = str[0:5].upper() + '.XDCE'
                 else:
                     str = str[0:6].upper() + '.XDCE'
