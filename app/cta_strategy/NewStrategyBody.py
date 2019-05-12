@@ -96,7 +96,10 @@ class StrategyBody():
             nts = 'YYYY-MM-DD HH:mm:ss'
         else:
             nts = self.nowTimeString
-        words = "[" + nts + " - " + self.frequency + "_" + self.security + ']：' + words
+        volumeArrowCount = self.getVolumeArrow()
+        priceArrowCount = self.getPriceArrow()
+        words = "V"+volumeArrowCount+"|P"+priceArrowCount
+        words = words + "|[" + nts + " - " + self.frequency + "_" + self.security + ']：' + words
         print(words)
         Util.log(words)
         if self.trader is not None:
@@ -259,6 +262,40 @@ class StrategyBody():
             rate = Util.getRate(fromPrice=nowPrice, toPrice=minClosePrice)
         return rate
 
+    def getVolumeArrow(self):
+        count = 0
+        indexList = self.df[self.df.EMA60 == self.df.EMA60].index.tolist()
+        if self.df is None or indexList.__len__() == 0:
+            return 0
+        i = indexList.__len__() - 1
+        flagVolume = self.df.loc[indexList[i], 'volume']
+        i = i - 1
+        while i >= 0:
+            volume = self.df.loc[indexList[i], 'volume']
+            if flagVolume > volume:
+                count = count + 1
+            else:
+                break
+            i = i - 1
+        return count
+
+    def getPriceArrow(self):
+        count = 0
+        indexList = self.df[self.df.EMA60 == self.df.EMA60].index.tolist()
+        if self.df is None or indexList.__len__() == 0:
+            return 0
+        i = indexList.__len__() - 1
+        closeFlag = self.df.loc[indexList[i], 'close']
+        i = i - 1
+        while i >= 0:
+            close = self.df.loc[indexList[i], 'close']
+            if closeFlag > close:
+                count = count + 1
+            else:
+                break
+            i = i - 1
+        return count
+
     def getAdvancedData(self, nowTimeString=None):
         newRow = None
         newIndex = None
@@ -322,6 +359,7 @@ class StrategyBody():
         self.df['EMAF'] = talib.EMA(np.array(close), timeperiod=self.fast_ema)
         self.df['EMAS'] = talib.EMA(np.array(close), timeperiod=self.slow_ema)
         self.df['ADX'] = talib.ADX(np.array(high), np.array(low), np.array(close), timeperiod=self.adx_timeperiod)
+        self.df['RSI9'] = talib.RSI(np.array(close), timeperiod=9)
         self.df.drop([self.df.index.tolist()[0]], inplace=True)
 
     def setPosition(self, position):
@@ -353,10 +391,10 @@ class StrategyBody():
 
             if self.real_open > 0 and self.trader is not None:
                 if self.position > 0:
-                    self.trader.sell(price=float(self.tick.last_price * 0.99), volume=np.int32(self.trade_position))
+                    self.trader.sell(price=self.tick.limit_down, volume=np.int32(self.trade_position))
                     self.write_log(words='止损止盈平多仓')
                 else:
-                    self.trader.cover(float(self.tick.last_price * 1.01), self.trade_position)
+                    self.trader.cover(price=self.tick.limit_up, volume=np.int32(self.trade_position))
                     self.write_log(words='止损止盈平空仓')
 
             self.setPosition(position=0)
@@ -402,18 +440,14 @@ class StrategyBody():
                 if self.runningStock is True and earningRate < self.real_open_rate_below and earningRate > self.real_open_rate and self.real_open == 0 and self.onlyKon == 0:
                     self.setReal_Open(real_open=self.price)
                     self.write_log(words='正式做多：' + str(self.price))
-                    self.write_log(words='正式做多：' + str(self.price))
-                    self.write_log(words='正式做多：' + str(self.price))
                     if self.trader is not None:
-                        self.trader.buy(price=float(self.tick.last_price * 1.01), volume=np.int32(self.trade_position))
+                        self.trader.buy(price=self.tick.limit_up, volume=np.int32(self.trade_position))
                         self.write_log(words='正式做多，交易完成')
                 elif self.runningStock is False and earningRate > self.real_open_rate and self.real_open == 0 and self.onlyKon == 0:
                     self.setReal_Open(real_open=self.price)
                     self.write_log(words='正式做多：' + str(self.price))
-                    self.write_log(words='正式做多：' + str(self.price))
-                    self.write_log(words='正式做多：' + str(self.price))
                     if self.trader is not None:
-                        self.trader.buy(price=float(self.tick.last_price * 0.99), volume=np.int32(self.trade_position))
+                        self.trader.buy(price=self.tick.limit_up, volume=np.int32(self.trade_position))
                         self.write_log(words='正式做多，交易完成')
 
             # 持有空仓
@@ -425,10 +459,8 @@ class StrategyBody():
                 if earningRate > self.real_open_rate and self.real_open == 0 and self.onlyDuo == 0:
                     self.setReal_Open(real_open=self.price)
                     self.write_log(words='正式做空：' + str(self.price))
-                    self.write_log(words='正式做空：' + str(self.price))
-                    self.write_log(words='正式做空：' + str(self.price))
                     if self.trader is not None:
-                        self.trader.short(price=float(self.tick.last_price * 0.99), volume=np.int32(self.trade_position))
+                        self.trader.short(price=self.tick.limit_down, volume=np.int32(self.trade_position))
                         self.write_log(words='正式做空，交易完成')
 
     def handleDOWN(self, earningRate, dangerRate):
@@ -447,7 +479,7 @@ class StrategyBody():
                     reduce(lambda x, y: x * y, self.clearRates)) + '!!! ----- !!!')
 
             if self.real_open > 0 and self.trader is not None:
-                self.trader.sell(float(self.tick.limit_down * 1.01), self.trade_position)
+                self.trader.sell(price=self.tick.limit_down, volume=np.int32(self.trade_position))
                 self.write_log(words='转趋势平多仓')
 
             if self.adx < self.adx_edge:
@@ -488,7 +520,7 @@ class StrategyBody():
                     reduce(lambda x, y: x * y, self.clearRates)) + '!!! ----- !!!')
 
             if self.real_open > 0 and self.trader is not None:
-                self.trader.cover(float(self.tick.limit_up * 0.99), self.trade_position)
+                self.trader.cover(price=self.tick.limit_up, volume=np.int32(self.trade_position))
                 self.write_log(words='转趋势平空仓')
 
             if self.adx < self.adx_edge:

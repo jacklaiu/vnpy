@@ -312,7 +312,6 @@ def isFutureTradingTime(nowTimeString):
     # 排除周末
     if wd == 5 or wd == 6:
         return False
-
     return True
 
 
